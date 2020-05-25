@@ -1,88 +1,77 @@
-let w = 60;
-let cells = [];
-let current;
-let cols, rows;
-let stack = [];
+
+
+let generation;
 
 
 function setup() {
-    createCanvas(600, 600);
-    background(51);
 
-    rows = floor(height / w);
-    cols = floor(width / w);
+    bestPhrase = createP("Best phrase:");
+    //bestPhrase.position(10,10);
+    bestPhrase.class("best");
+  
+    allPhrases = createP("All phrases:");
+    allPhrases.position(600, 10);
+    allPhrases.class("all");
+  
+    stats = createP("Stats");
+    //stats.position(10,200);
+    stats.class("stats");
 
-    for (let j = 0; j < rows; j++) {
-        for (let i = 0; i < cols; i++) {
-            cells.push(new Cell(i, j));
-        }
-    }
 
-    current = cells[0];
+
+    let target = "Mi mangerei 1000 slinzeghe a colazione";
+    let startingGenerations = 100;
+    let mutationChance = 0.01;
+
+    generation = new Generation(target, mutationChance, startingGenerations);
+
 }
 
 function draw() {
-    background(51)
-    for (let c of cells) {
-        c.show()
-    }
-    drawMaze()
-}
 
-function drawMaze() {
-    current.visited = true;
-    current.highlight();
 
-    const next = current.checkNeighbour();
+    generation.selection();
 
-    if (next) {
-        next.visited = true;
+    generation.reproduction();
 
-        stack.push(next);
-
-        removeWalls(current, next)
-
-        current = next;
-    }
-    else if (stack.length > 0) {
-        current = stack.pop();
-        
-    }
-    else {
-        current = cells[0];
-    }
-}
-
-function index(i, j) {
-    if (i < 0 || j < 0 || i > cols - 1 || j > rows - 1) {
-        return -1;
-    }
-    return i + j * cols;
-}
-
-function removeWalls(current, next) {
-
-    let di = current.i - next.i;
-
-    if (di < 0) {
-        current.walls[1] = false;
-        next.walls[3] = false;
-    }
-    else if (di > 0) {
-        current.walls[3] = false;
-        next.walls[1] = false;
+    if(generation.isFinished()){
+        noLoop();
     }
 
-    let dj = current.j - next.j;
-    if (dj < 0) {
-        current.walls[2] = false;
-        next.walls[0] = false;
-    }
-    else if (dj > 0) {
-        current.walls[0] = false;
-        next.walls[2] = false;
-    }
+    displayLoop();
 }
 
 
+function selection(){
+    generation.evalFitness();
+    generation.buildMatingPool();
+}
 
+function reproduction(){
+    const nextGeneration = [];
+    for(let i = 0; i < n; i++){
+        generation.pickParents();
+        child = generation.crossover();
+        child = child.mutation();
+        nextGeneration.push(child);
+    }
+
+    generation = nextGeneration;
+}
+
+
+function displayInfo() {
+    // Display current status of population
+    let answer = generation.getBest();
+  
+    bestPhrase.html("Best phrase:<br>" + answer);
+  
+    let statstext = "Total Generations:     " + generation.getGenerations() + "<br>";
+    statstext += "Average Fitness:       " + nf(generation.getAverageFitness()) + "<br>";
+    statstext += "Starting Generation:      " + startingGenerations + "<br>";
+    statstext += "Mutation Rate:         " + floor(mutationChance * 100) + "%";
+  
+    stats.html(statstext);
+  
+    allPhrases.html("All phrases:<br>" + generation.allPhrases())
+  }
