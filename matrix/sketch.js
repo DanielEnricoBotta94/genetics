@@ -8,9 +8,11 @@ let bestPhrase;
 let allPhrases;
 let stats;
 
-var streams = [];
-var fadeInterval = 1.6;
-var symbolSize = 30;
+streams = [];
+let fadeInterval = 1.6;
+let symbolSize = 30;
+
+let finished = false;
 
 function setup() {
     geneticSetup();
@@ -50,10 +52,14 @@ function draw() {
 
     // If we found the target phrase, stop
     if (population.isFinished()) {
+        if(!finished){
+            console.log(`${population.generations} - ${population.best}`);
+            finished = true;
+        }
         population.setToBest();
     }
     else{
-        console.log(population.best);
+        console.log(`${population.generations} - ${population.best}`);
     }
 
     background(0, 150);
