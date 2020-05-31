@@ -1,5 +1,5 @@
 function newChar() {
-    let c = floor(random(63, 122));
+    let c = floor(random(0, 350));
     if (c === 63) c = 32;
     if (c === 64) c = 46;
   
